@@ -23,5 +23,13 @@ namespace QuizMaker.Api.Controllers
             await _quizService.CreateQuiz(request, cancellationToken);
             return NoContent();
         }
+
+        [HttpGet]
+        [Route("")]
+        public async Task<IActionResult> GetQuizzes(CancellationToken cancellationToken)
+        {
+            var quizzes = await _quizService.GetQuizzes(cancellationToken);
+            return Ok(quizzes);
+        }
     }
 }
