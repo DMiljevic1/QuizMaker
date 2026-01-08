@@ -185,7 +185,8 @@ namespace QuizMaker.Infrastructure.Migrations
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Question", b =>
                 {
-                    b.Navigation("Answer");
+                    b.Navigation("Answer")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Quiz", b =>

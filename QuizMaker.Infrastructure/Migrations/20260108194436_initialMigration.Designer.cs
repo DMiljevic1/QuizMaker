@@ -12,8 +12,8 @@ using QuizMaker.Infrastructure.Contexts;
 namespace QuizMaker.Infrastructure.Migrations
 {
     [DbContext(typeof(QuizContext))]
-    [Migration("20260108165703_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260108194436_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -188,7 +188,8 @@ namespace QuizMaker.Infrastructure.Migrations
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Question", b =>
                 {
-                    b.Navigation("Answer");
+                    b.Navigation("Answer")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Quiz", b =>
