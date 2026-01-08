@@ -1,8 +1,11 @@
-﻿namespace QuizMaker.Domain.Entities;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class Quiz : EntityBase<int>
+namespace QuizMaker.Domain.Entities;
+
+public class Quiz : AuditBase<int>
 {
+    [MaxLength(100)]
     public string Name { get; set; } = default!;
 
-    public ICollection<Question> Questions { get; set; } = new List<Question>();
+    public ICollection<QuizQuestion> QuizQuestions { get; set; } = new List<QuizQuestion>();
 }
