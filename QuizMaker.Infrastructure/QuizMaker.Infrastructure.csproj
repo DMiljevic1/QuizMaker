@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\QuizMaker.Application\QuizMaker.Application.csproj" />
     <ProjectReference Include="..\QuizMaker.Domain\QuizMaker.Domain.csproj" />
   </ItemGroup>
 
