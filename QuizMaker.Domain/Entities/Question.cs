@@ -1,6 +1,6 @@
 ﻿namespace QuizMaker.Domain.Entities;
 
-public class Question : EntityBase<int>
+public class Question : AuditBase<int>
 {
     public string Text { get; set; } = default!;
 

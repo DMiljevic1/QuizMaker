@@ -1,6 +1,6 @@
 ﻿namespace QuizMaker.Domain.Entities;
 
-public class QuizQuestion : EntityBase<int>
+public class QuizQuestion : AuditBase<int>
 {
     public int QuizId { get; set; }
     public Quiz? Quiz { get; set; }
