@@ -30,7 +30,8 @@ public class QuizContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(qc => new { qc.QuizId, qc.QuestionId})
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[IsDeleted] = 0");
         });
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
