@@ -62,8 +62,26 @@ public class QuizService : IQuizService
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<PagedResult<QuizResponse>> GetQuizzes(CancellationToken cancellationToken)
+    public async Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var query = _context.Quizzes
+            .AsNoTracking()
+            .Select(x => new QuizResponse
+            {
+                Id = x.Id,
+                Name = x.Name,
+                QuestionsAnswers = x.QuizQuestions
+                    .Select(qc => new QuestionAnswerResponse
+                    {
+                        QuestionId = qc.QuestionId,
+                        QuestionText = qc.Question.Text,
+                        AnswerId = qc.Question.Answer!.Id,
+                        AnswerText = qc.Question.Answer.Text
+                    })
+                    .ToList()
+            })
+            .AsQueryable();
+
+        return await query.ToPagedResultAsync(parameters.PageNumber, parameters.PageSize, cancellationToken);
     }
 }

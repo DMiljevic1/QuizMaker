@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaker.Application.Dto.Requests;
+using QuizMaker.Application.Dto.Responses;
+using QuizMaker.Application.Paginations;
 using QuizMaker.Application.Services;
 
 namespace QuizMaker.Api.Controllers
@@ -17,6 +19,7 @@ namespace QuizMaker.Api.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [Route("create")]
         public async Task<IActionResult> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
         {
@@ -25,10 +28,11 @@ namespace QuizMaker.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<QuizResponse>), StatusCodes.Status200OK)]
         [Route("")]
-        public async Task<IActionResult> GetQuizzes(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetQuizzes([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
         {
-            var quizzes = await _quizService.GetQuizzes(cancellationToken);
+            var quizzes = await _quizService.GetQuizzes(parameters, cancellationToken);
             return Ok(quizzes);
         }
     }

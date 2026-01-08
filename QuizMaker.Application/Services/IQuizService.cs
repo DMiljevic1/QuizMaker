@@ -7,5 +7,5 @@ namespace QuizMaker.Application.Services;
 public interface IQuizService
 {
     Task CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken);
-    Task<PagedResult<QuizResponse>> GetQuizzes(CancellationToken cancellationToken);
+    Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken);
 }
