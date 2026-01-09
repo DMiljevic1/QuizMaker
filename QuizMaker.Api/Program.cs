@@ -1,3 +1,4 @@
+using QuizMaker.Api.Extensions;
 using QuizMaker.Infrastructure;
 using QuizMaker.Infrastructure.Extensions;
 
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSerilogLogging(builder);
+builder.Services.AddGlobalException();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
@@ -18,6 +21,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseExceptionHandler();
 
 app.UseAuthorization();
 
