@@ -1,21 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaker.Application.Dto.Requests;
 using QuizMaker.Application.Dto.Responses;
+using QuizMaker.Application.Exceptions;
+using QuizMaker.Application.Exporters;
 using QuizMaker.Application.Paginations;
 using QuizMaker.Application.Services;
 using QuizMaker.Domain.Entities;
 using QuizMaker.Infrastructure.Contexts;
+using QuizMaker.Infrastructure.Exporters;
 
 namespace QuizMaker.Infrastructure.Services;
 
 public class QuizService : IQuizService
 {
     private readonly QuizContext _context;
+    private readonly IExporterProvider _exporterProvider;
 
-    public QuizService(QuizContext context)
+    public QuizService(QuizContext context, IExporterProvider exporterProvider)
     {
 
         _context = context;
+        _exporterProvider = exporterProvider;
     }
 
     public async Task CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
@@ -92,7 +97,7 @@ public class QuizService : IQuizService
             .FirstOrDefaultAsync(x => x.Id == request.QuizId, cancellationToken);
 
         if (quiz == null)
-            throw new Exception("Ode ide custome ex");
+            throw new NotFoundException($"Quiz not found. QuizId={request.QuizId}");
 
         quiz.Name = request.QuizName;
 
@@ -136,9 +141,28 @@ public class QuizService : IQuizService
             .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
 
         if (quiz == null)
-            throw new Exception("Ovdje treba ic custome ex");
+            throw new NotFoundException($"Quiz not found. QuizId={quizId}");
 
         _context.Quizzes.Remove(quiz);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public IEnumerable<string> GetAvailableExportFormats()
+    {
+        return _exporterProvider.GetAvailableFormats();
+    }
+
+    public async Task<byte[]> ExportQuiz(int quizId, string format)
+    {
+        var quiz = await _context.Quizzes
+            .AsNoTracking()
+            .Include(x => x.QuizQuestions).ThenInclude(x => x.Question)
+            .FirstOrDefaultAsync(x => x.Id == quizId);
+
+        if (quiz == null)
+            throw new NotFoundException($"Quiz not found. QuizId={quizId}");
+
+        var exporter = _exporterProvider.GetExporter(format);
+        return exporter.Export(quiz);
     }
 }

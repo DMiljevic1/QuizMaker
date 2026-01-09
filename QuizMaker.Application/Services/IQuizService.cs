@@ -10,4 +10,6 @@ public interface IQuizService
     Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken);
     Task UpdateQuiz(UpdateQuizRequest request, CancellationToken cancellationToken);
     Task DeleteQuiz(int quizId, CancellationToken cancellationToken);
+    IEnumerable<string> GetAvailableExportFormats();
+    Task<byte[]> ExportQuiz(int quizId, string format);
 }

@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuizMaker.Application.Exporters;
 using QuizMaker.Application.Services;
 using QuizMaker.Infrastructure.Contexts;
+using QuizMaker.Infrastructure.Exporters;
 using QuizMaker.Infrastructure.Services;
 
 namespace QuizMaker.Infrastructure;
@@ -13,6 +15,7 @@ public static class DependencyInjection
     {
         ConfigureDbConnection(services, configuration);
         ConfigureApplicationServices(services);
+        ConfigureExporters(services);
     }
 
     private static void ConfigureDbConnection(IServiceCollection services, IConfiguration configuration)
@@ -28,5 +31,11 @@ public static class DependencyInjection
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<IQuestionService, QuestionService>();
+    }
+
+    private static void ConfigureExporters(IServiceCollection services)
+    {
+        services.AddSingleton<IExporterProvider, ExporterProvider>();
     }
 }
