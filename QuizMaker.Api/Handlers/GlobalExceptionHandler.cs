@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using QuizMaker.Application.Exceptions;
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace QuizMaker.Api.Handlers;
 
@@ -20,19 +20,11 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         switch (exception)
         {
-            case OperationCanceledException:
-                _logger.LogInformation(exception, "Request canceled by client.");
-                problemDetails.Status = StatusCodes.Status408RequestTimeout;
-                problemDetails.Title = "Request Canceled";
-                problemDetails.Detail = "The request was canceled before it could finish.";
-                break;
-
             case ValidationException ve:
                 _logger.LogWarning(exception, "Validation error: {Message}", ve.Message);
                 problemDetails.Status = StatusCodes.Status400BadRequest;
                 problemDetails.Title = "Validation Failed";
-                //problemDetails.Detail = string.Join(" ", ve.Errors.Select(e => e.ErrorMessage));
-                problemDetails.Detail = "";
+                problemDetails.Detail = string.Join(" ", ve.Errors.Select(e => e.ErrorMessage));
                 break;
 
             case NotFoundException:
@@ -47,6 +39,13 @@ public class GlobalExceptionHandler : IExceptionHandler
                 problemDetails.Status = StatusCodes.Status400BadRequest;
                 problemDetails.Title = "Invalid Request";
                 problemDetails.Detail = "The request could not be understood or was missing required parameters.";
+                break;
+
+            case BadRequestException bre:
+                _logger.LogWarning(exception, "Bad request: {Message}", bre.Message);
+                problemDetails.Status = StatusCodes.Status400BadRequest;
+                problemDetails.Title = "Bad Request";
+                problemDetails.Detail = bre.Message;
                 break;
 
             default:

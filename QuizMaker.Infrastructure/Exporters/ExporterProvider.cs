@@ -27,7 +27,7 @@ public class ExporterProvider : IExporterProvider
     public IQuizExporter GetExporter(string format)
     {
         if (string.IsNullOrWhiteSpace(format))
-            throw new ArgumentException("Format not provided", nameof(format));
+            throw new BadRequestException("Format not provided.");
 
         var normalizedFormat = format.Trim().ToUpperInvariant();
 

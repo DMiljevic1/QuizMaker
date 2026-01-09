@@ -66,15 +66,7 @@ public class QuizController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ExportQuiz([FromRoute] int quizId, [FromQuery] string format)
     {
-        try
-        {
-            var fileBytes = await _quizService.ExportQuiz(quizId, format);
-
-            return File(fileBytes, "application/octet-stream", $"quiz_{quizId}.{format.ToLower()}");
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var fileBytes = await _quizService.ExportQuiz(quizId, format);
+        return File(fileBytes, "application/octet-stream", $"quiz_{quizId}.{format.ToLower()}");
     }
 }
