@@ -83,7 +83,7 @@ namespace QuizMaker.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Questions");
+                    b.ToTable("NewQuestionsAnswers");
                 });
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Quiz", b =>
@@ -106,7 +106,7 @@ namespace QuizMaker.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("QuizName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -185,7 +185,8 @@ namespace QuizMaker.Infrastructure.Migrations
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Question", b =>
                 {
-                    b.Navigation("Answer");
+                    b.Navigation("Answer")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Quiz", b =>

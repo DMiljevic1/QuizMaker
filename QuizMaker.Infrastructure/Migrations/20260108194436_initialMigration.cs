@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaker.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Questions",
+                name: "NewQuestionsAnswers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -64,7 +64,7 @@ namespace QuizMaker.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Answers_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Questions",
+                        principalTable: "NewQuestionsAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -88,7 +88,7 @@ namespace QuizMaker.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_QuizQuestions_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "Questions",
+                        principalTable: "NewQuestionsAnswers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -128,7 +128,7 @@ namespace QuizMaker.Infrastructure.Migrations
                 name: "QuizQuestions");
 
             migrationBuilder.DropTable(
-                name: "Questions");
+                name: "NewQuestionsAnswers");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");

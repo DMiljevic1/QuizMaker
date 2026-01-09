@@ -4,5 +4,5 @@ public class Question : AuditBase<int>
 {
     public string Text { get; set; } = default!;
 
-    public Answer? Answer { get; set; }
+    public Answer Answer { get; set; } = default!;
 }

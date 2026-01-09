@@ -34,6 +34,13 @@ public class QuizContext : DbContext
                 .HasFilter("[IsDeleted] = 0");
         });
 
+        modelBuilder.Entity<Question>()
+            .HasOne(q => q.Answer)
+            .WithOne(a => a.Question)
+            .HasForeignKey<Answer>(a => a.QuestionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var clrType = entityType.ClrType;
