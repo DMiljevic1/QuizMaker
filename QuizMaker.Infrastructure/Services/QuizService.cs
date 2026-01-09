@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using QuizMaker.Application.Dto.Requests;
 using QuizMaker.Application.Dto.Responses;
 using QuizMaker.Application.Exceptions;
@@ -15,16 +16,23 @@ public class QuizService : IQuizService
 {
     private readonly QuizContext _context;
     private readonly IExporterProvider _exporterProvider;
+    private readonly IValidator<CreateQuizRequest> _createValidator;
+    private readonly IValidator<UpdateQuizRequest> _updateValidator;
 
-    public QuizService(QuizContext context, IExporterProvider exporterProvider)
+    public QuizService(QuizContext context, IExporterProvider exporterProvider, IValidator<CreateQuizRequest> createValidator, IValidator<UpdateQuizRequest> updateValidator)
     {
-
         _context = context;
         _exporterProvider = exporterProvider;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     public async Task CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
     {
+        var validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var quiz = new Quiz
         {
             Name = request.QuizName
@@ -45,7 +53,7 @@ public class QuizService : IQuizService
             }
         }
 
-        foreach (var newQuestion in request.NewQuestionsAnswers)
+        foreach (var newQuestion in request.NewQuestions)
         {
             var question = new Question
             {
@@ -92,6 +100,10 @@ public class QuizService : IQuizService
 
     public async Task UpdateQuiz(UpdateQuizRequest request, CancellationToken cancellationToken)
     {
+        var validationResult = await _updateValidator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+            throw new ValidationException(validationResult.Errors);
+
         var quiz = await _context.Quizzes
             .Include(x => x.QuizQuestions).ThenInclude(x => x.Question).ThenInclude(x => x.Answer)
             .FirstOrDefaultAsync(x => x.Id == request.QuizId, cancellationToken);
@@ -101,7 +113,7 @@ public class QuizService : IQuizService
 
         quiz.Name = request.QuizName;
 
-        var requestedQuestions = request.NewQuestionsAnswers;
+        var requestedQuestions = request.NewQuestions;
 
         var existingQuestionIds = request.ExistingQuestionIds
             .ToHashSet();
@@ -121,7 +133,7 @@ public class QuizService : IQuizService
                 quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = questionId });
         }
 
-        foreach (var newQ in request.NewQuestionsAnswers)
+        foreach (var newQ in request.NewQuestions)
         {
             var question = new Question
             {
