@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using QuizMaker.Application.Dto.Requests;
 using QuizMaker.Application.Dto.Responses;
 using QuizMaker.Application.Paginations;
@@ -19,8 +18,7 @@ namespace QuizMaker.Api.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [Route("create")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<IActionResult> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
         {
             await _quizService.CreateQuiz(request, cancellationToken);
@@ -29,11 +27,26 @@ namespace QuizMaker.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<QuizResponse>), StatusCodes.Status200OK)]
-        [Route("")]
         public async Task<IActionResult> GetQuizzes([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
         {
             var quizzes = await _quizService.GetQuizzes(parameters, cancellationToken);
             return Ok(quizzes);
+        }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UpdateQuiz([FromBody] UpdateQuizRequest request, CancellationToken cancellationToken)
+        {
+            await _quizService.UpdateQuiz(request, cancellationToken);
+            return NoContent();
+        }
+
+        [HttpDelete("{quizId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> DeleteQuiz([FromRoute] int quizId, CancellationToken cancellationToken)
+        {
+            await _quizService.DeleteQuiz(quizId, cancellationToken);
+            return NoContent();
         }
     }
 }

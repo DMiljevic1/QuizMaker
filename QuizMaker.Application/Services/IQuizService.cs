@@ -8,4 +8,6 @@ public interface IQuizService
 {
     Task CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken);
     Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken);
+    Task UpdateQuiz(UpdateQuizRequest request, CancellationToken cancellationToken);
+    Task DeleteQuiz(int quizId, CancellationToken cancellationToken);
 }

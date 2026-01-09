@@ -22,7 +22,7 @@ public class QuizService : IQuizService
     {
         var quiz = new Quiz
         {
-            Name = request.Name
+            Name = request.QuizName
         };
 
         if (request.ExistingQuestionsIds.Any())
@@ -40,7 +40,7 @@ public class QuizService : IQuizService
             }
         }
 
-        foreach (var newQuestion in request.NewQuestions)
+        foreach (var newQuestion in request.NewQuestionsAnswers)
         {
             var question = new Question
             {
@@ -57,7 +57,7 @@ public class QuizService : IQuizService
             });
         }
 
-        await _context.Quizzes.AddAsync(quiz);
+        await _context.Quizzes.AddAsync(quiz, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -83,5 +83,62 @@ public class QuizService : IQuizService
             .AsQueryable();
 
         return await query.ToPagedResultAsync(parameters.PageNumber, parameters.PageSize, cancellationToken);
+    }
+
+    public async Task UpdateQuiz(UpdateQuizRequest request, CancellationToken cancellationToken)
+    {
+        var quiz = await _context.Quizzes
+            .Include(x => x.QuizQuestions).ThenInclude(x => x.Question).ThenInclude(x => x.Answer)
+            .FirstOrDefaultAsync(x => x.Id == request.QuizId, cancellationToken);
+
+        if (quiz == null)
+            throw new Exception("Ode ide custome ex");
+
+        quiz.Name = request.QuizName;
+
+        var requestedQuestions = request.NewQuestionsAnswers;
+
+        var existingQuestionIds = request.ExistingQuestionIds
+            .ToHashSet();
+
+        var toRemove = quiz.QuizQuestions
+            .Where(x => !existingQuestionIds.Contains(x.QuestionId))
+            .ToList();
+
+        foreach(var quizQuestion in toRemove)
+        {
+            quiz.QuizQuestions.Remove(quizQuestion);
+        }
+
+        foreach (var questionId in request.ExistingQuestionIds)
+        {
+            if (!quiz.QuizQuestions.Any(x => x.QuestionId == questionId))
+                quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = questionId });
+        }
+
+        foreach (var newQ in request.NewQuestionsAnswers)
+        {
+            var question = new Question
+            {
+                Text = newQ.QuestionText,
+                Answer = new Answer { Text = newQ.AnswerText }
+            };
+
+            quiz.QuizQuestions.Add(new QuizQuestion { Question = question });
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteQuiz(int quizId, CancellationToken cancellationToken)
+    {
+        var quiz = await _context.Quizzes
+            .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
+
+        if (quiz == null)
+            throw new Exception("Ovdje treba ic custome ex");
+
+        _context.Quizzes.Remove(quiz);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }
