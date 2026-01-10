@@ -1,0 +1,27 @@
+services:
+  quizmaker.api:
+    image: ${DOCKER_REGISTRY-}quizmakerapi
+    build:
+      context: .
+      dockerfile: QuizMaker.Api/Dockerfile
+    container_name: quiz-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: >
+        Server=host.docker.internal,1433;
+        Database=Quiz;
+        User Id=quiz_user;
+        Password=StrongPass123!;
+        TrustServerCertificate=True
+    depends_on:
+      - quizmaker.seq
+
+  quizmaker.seq:
+    image: datalust/seq
+    container_name: quizmaker-seq
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
+    volumes:
+      - ./seq-data:/data
