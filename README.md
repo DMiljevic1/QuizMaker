@@ -52,12 +52,24 @@ Run QuizMaker using Docker with SQL Server and Seq logging.
 
 **Steps:**
 
-1. Adjust the connection string in `docker-compose.yml`:
+1. Adjust the connection string in `docker-compose.yml`.
+
 2. Start the containers:
--  Open Visual studio, make startup project Docker-compose and press Start or using bash navigate to folder containing docker-compose.yml and run `docker-compose up -d`
+
+   - **Visual Studio:**  
+     Open the solution, set the startup project to `docker-compose`, and press **Start**.  
+   - **Bash / Command Line:**  
+     Navigate to the folder containing `docker-compose.yml` and run:
+
+     ```bash
+     docker-compose up -d
+     ```
+
 3. Access the services:
-API:
--  HTTPS: https://localhost:5001/swagger/index.html
--  HTTP: http://localhost:5000/swagger/index.html
-Seq logs:
--  http://localhost:5341/
+
+   - **API:**  
+     - HTTPS: [https://localhost:5001/swagger/index.html](https://localhost:5001/swagger/index.html)  
+     - HTTP: [http://localhost:5000/swagger/index.html](http://localhost:5000/swagger/index.html)
+
+   - **Seq logs:**  
+     - [http://localhost:5341/](http://localhost:5341/)
