@@ -19,6 +19,7 @@ public class QuizController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
     {
         await _quizService.CreateQuiz(request, cancellationToken);
@@ -35,6 +36,7 @@ public class QuizController : ControllerBase
 
     [HttpPut]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateQuiz([FromBody] UpdateQuizRequest request, CancellationToken cancellationToken)
     {
@@ -53,6 +55,7 @@ public class QuizController : ControllerBase
 
     [HttpGet("exporters/{quizId}")]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetAvailableExporters()
     {
