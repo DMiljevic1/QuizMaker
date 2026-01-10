@@ -19,8 +19,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 
-    
-
     c.SupportNonNullableReferenceTypes();
 });
 
