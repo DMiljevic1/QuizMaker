@@ -31,10 +31,9 @@ The architecture ensures a clear separation of concerns, testability, and mainta
    ```bash
    git clone <repository-url>
    cd QuizMaker
-2. Open QuizMaker.Api project
-3. Adjust the connection string in appsettings.Development.json to point to your local SQL Server
-4. Run Api project
-5. Access SwaggerAccess Swagger UI:
+2. Adjust the connection string in appsettings.Development.json to point to your local SQL Server
+3. Run Api project
+4. Access SwaggerAccess Swagger UI:
 -  HTTPS: https://localhost:5001/swagger/index.html
 -  HTTP: http://localhost:5000/swagger/index.html
 
@@ -52,9 +51,15 @@ Run QuizMaker using Docker with SQL Server and Seq logging.
 
 **Steps:**
 
-1. Adjust the connection string in `docker-compose.yml`.
+1. Clone the repository:
 
-2. Start the containers:
+   ```bash
+   git clone <repository-url>
+   cd QuizMaker
+
+2. Adjust the connection string in `docker-compose.yml`.
+
+3. Start the containers:
 
    - **Visual Studio:**  
      Open the solution, set the startup project to `docker-compose`, and press **Start**.  
@@ -65,7 +70,7 @@ Run QuizMaker using Docker with SQL Server and Seq logging.
      docker-compose up -d
      ```
 
-3. Access the services:
+4. Access the services:
 
    - **API:**  
      - HTTPS: [https://localhost:5001/swagger/index.html](https://localhost:5001/swagger/index.html)  
