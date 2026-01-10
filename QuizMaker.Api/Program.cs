@@ -28,6 +28,7 @@ builder.Services.AddSerilogLogging(builder);
 builder.Services.AddGlobalException();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -45,5 +46,7 @@ app.UseExceptionHandler();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
