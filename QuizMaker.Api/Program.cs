@@ -1,13 +1,29 @@
+using Microsoft.AspNetCore.Mvc;
 using QuizMaker.Api.Extensions;
+using QuizMaker.Application;
 using QuizMaker.Infrastructure;
 using QuizMaker.Infrastructure.Extensions;
-using QuizMaker.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add(new ProducesResponseTypeAttribute(typeof(ProblemDetails), StatusCodes.Status500InternalServerError));
+});
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new()
+    {
+        Title = "Aymo API",
+        Version = "v1"
+    });
+
+    
+
+    c.SupportNonNullableReferenceTypes();
+});
+
 builder.Services.AddSerilogLogging(builder);
 builder.Services.AddGlobalException();
 builder.Services.AddInfrastructure(builder.Configuration);
