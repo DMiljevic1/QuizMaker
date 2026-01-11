@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaker.Domain.Entities;
 using QuizMaker.Domain.Interfaces;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace QuizMaker.Infrastructure.Contexts;
@@ -76,26 +77,20 @@ public class QuizContext : DbContext
         {
             var clrType = entityType.ClrType;
 
-            var baseType = clrType.BaseType;
-            while (baseType != null)
+            if (typeof(IAuditable).IsAssignableFrom(clrType))
             {
-                if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(AuditBase<>))
-                {
-                    var keyType = baseType.GetGenericArguments()[0];
-                    var method = typeof(QuizContext)
-                        .GetMethod(nameof(ApplySoftDeleteFilter), BindingFlags.Static | BindingFlags.NonPublic);
-                    var genericMethod = method!.MakeGenericMethod(clrType, keyType);
-                    genericMethod.Invoke(null, new object[] { modelBuilder });
-                    break;
-                }
-                baseType = baseType.BaseType;
+                modelBuilder.Entity(clrType)
+                    .HasQueryFilter(CreateIsNotDeletedFilter(clrType));
             }
         }
     }
-
-    private static void ApplySoftDeleteFilter<TEntity, TKey>(ModelBuilder modelBuilder) where TEntity : AuditBase<TKey>
+    private static LambdaExpression CreateIsNotDeletedFilter(Type entityType)
     {
-        modelBuilder.Entity<TEntity>().HasQueryFilter(e => !e.IsDeleted);
+        var parameter = Expression.Parameter(entityType, "e");
+        var property = Expression.Property(parameter, nameof(IAuditable.IsDeleted));
+        var condition = Expression.Equal(property, Expression.Constant(false));
+
+        return Expression.Lambda(condition, parameter);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -112,10 +107,10 @@ public class QuizContext : DbContext
                 continue;
             }
 
-            if (entry.Entity is AuditBase<Guid> entity)
+            if (entry.Entity is IAuditable auditable)
             {
-                entity.IsDeleted = true;
-                entity.DateDeleted = utcNow;
+                auditable.IsDeleted = true;
+                auditable.DateDeleted = utcNow;
                 entry.State = EntityState.Modified;
             }
         }
@@ -123,13 +118,13 @@ public class QuizContext : DbContext
         foreach (var entry in ChangeTracker.Entries()
                      .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
         {
-            if (entry.Entity is not AuditBase<Guid> entity)
+            if (entry.Entity is not IAuditable auditable)
                 continue;
 
             if (entry.State == EntityState.Added)
-                entity.DateCreated = utcNow;
+                auditable.DateCreated = utcNow;
             else
-                entity.DateUpdated = utcNow;
+                auditable.DateUpdated = utcNow;
         }
 
         return await base.SaveChangesAsync(cancellationToken);

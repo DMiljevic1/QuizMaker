@@ -1,6 +1,8 @@
-﻿namespace QuizMaker.Domain.Entities;
+﻿using QuizMaker.Domain.Interfaces;
 
-public class AuditBase<TKey> : EntityBase<TKey>
+namespace QuizMaker.Domain.Entities;
+
+public abstract class AuditBase<TKey> : EntityBase<TKey>, IAuditable
 {
     public DateTime DateCreated { get; set; }
     public DateTime? DateUpdated { get; set; }
