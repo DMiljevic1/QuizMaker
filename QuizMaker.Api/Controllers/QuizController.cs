@@ -48,6 +48,21 @@ public class QuizController : ControllerBase
         return Ok(quizzes);
     }
 
+    [HttpGet("{quizId}")]
+    [SwaggerOperation(
+        Summary = "Retrieves an existing quiz",
+        Description = "Retrieves the details of an existing quiz. " +
+                      "Returns 200 Ok on success or 404 Not Found if the quiz does not exist. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
+    [ProducesResponseType(typeof(QuizResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetQuiz([FromRoute] int quizId, CancellationToken cancellationToken)
+    {
+        var quiz = await _quizService.GetQuiz(quizId, cancellationToken);
+        return Ok(quiz);
+    }
+
     [HttpPut("{quizId}")]
     [SwaggerOperation(
         Summary = "Updates an existing quiz",

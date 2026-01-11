@@ -101,6 +101,33 @@ public class QuizService : IQuizService
         return await query.ToPagedResultAsync(parameters.PageNumber, parameters.PageSize, cancellationToken);
     }
 
+    public async Task<QuizResponse> GetQuiz(int quizId, CancellationToken cancellationToken)
+    {
+        var quiz = await _context.Quizzes
+            .AsNoTracking()
+            .Where(x => x.Id == quizId)
+            .Select(x => new QuizResponse
+            {
+                Id= x.Id,
+                Name = x.Name,
+                QuestionsAnswers = x.QuizQuestions
+                    .Select(qc => new QuestionAnswerResponse
+                    {
+                        QuestionId = qc.QuestionId,
+                        QuestionText = qc.Question.Text,
+                        AnswerId = qc.Question.Answer!.Id,
+                        AnswerText = qc.Question.Answer.Text
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (quiz == null)
+            throw new NotFoundException($"Quiz not found. QuizId={quizId}");
+
+        return quiz;
+    }
+
     public async Task UpdateQuiz(int quizId, UpdateQuizRequest request, CancellationToken cancellationToken)
     {
         var validationResult = await _updateValidator.ValidateAsync(request, cancellationToken);
