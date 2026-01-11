@@ -3,6 +3,7 @@ using QuizMaker.Application.Dto.Requests;
 using QuizMaker.Application.Dto.Responses;
 using QuizMaker.Application.Paginations;
 using QuizMaker.Application.Services;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace QuizMaker.Api.Controllers;
 
@@ -18,6 +19,12 @@ public class QuizController : ControllerBase
     }
 
     [HttpPost]
+    [SwaggerOperation(
+        Summary = "Creates a new quiz",
+        Description = "Creates a quiz with the provided details. Returns 204 No Content on success. " +
+                      "If the request is invalid, returns 400 Bad Request. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
@@ -27,7 +34,14 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<QuizResponse>), StatusCodes.Status200OK)]
+    [SwaggerOperation(
+        Summary = "Retrieves a list of quizzes",
+        Description = "Returns a paginated list of all quizzes. " +
+                      "Supports query parameters for pagination such as page number and page size. " +
+                      "Returns 200 OK with the list of quizzes. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
+    [ProducesResponseType(typeof(PagedResult<QuizResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetQuizzes([FromQuery] PaginationParameters parameters, CancellationToken cancellationToken)
     {
         var quizzes = await _quizService.GetQuizzes(parameters, cancellationToken);
@@ -35,6 +49,13 @@ public class QuizController : ControllerBase
     }
 
     [HttpPut]
+    [SwaggerOperation(
+        Summary = "Updates an existing quiz",
+        Description = "Updates the details of an existing quiz. " +
+                      "Returns 204 No Content on success, 400 Bad Request if the input is invalid, " +
+                      "or 404 Not Found if the quiz does not exist. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -45,6 +66,12 @@ public class QuizController : ControllerBase
     }
 
     [HttpDelete("{quizId}")]
+    [SwaggerOperation(
+        Summary = "Deletes a quiz",
+        Description = "Soft deletes a quiz by its ID. " +
+                      "Returns 204 No Content if deletion was successful, or 404 Not Found if the quiz does not exist. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteQuiz([FromRoute] int quizId, CancellationToken cancellationToken)
@@ -54,8 +81,13 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("exporters/{quizId}")]
+    [SwaggerOperation(
+        Summary = "Gets available export formats for a quiz",
+        Description = "Returns a list of all available export formats (e.g., CSV) for the specified quiz. " +
+                      "Returns 200 OK with the list or 404 Not Found if the quiz does not exist. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetAvailableExporters()
     {
@@ -64,6 +96,13 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("export/{quizId}")]
+    [SwaggerOperation(
+        Summary = "Exports a quiz in a specific format",
+        Description = "Exports the specified quiz in the requested format (e.g., CSV). " +
+                      "Returns 200 OK with the file content, 400 Bad Request if the format is invalid, " +
+                      "or 404 Not Found if the quiz does not exist. " +
+                      "Unexpected errors return 500 Internal Server Error."
+    )]
     [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -15,9 +15,12 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new()
     {
-        Title = "Aymo API",
-        Version = "v1"
+        Title = "swagger doc",
+        Version = "v1",
+        Description = "API for managing quizzes and questions"
     });
+
+    c.EnableAnnotations();
 
     c.SupportNonNullableReferenceTypes();
 });
@@ -32,8 +35,14 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi2_0;
+    });
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Quiz API v1");
+    });
     app.ApplyMigrations();
 }
 
