@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuizMaker.Domain.Entities;
+using QuizMaker.Domain.Interfaces;
 using System.Reflection;
 
 namespace QuizMaker.Infrastructure.Contexts;
@@ -17,29 +18,59 @@ public class QuizContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Quiz>(entity =>
+        {
+            entity.HasKey(q => q.Id);
+
+            entity.Property(q => q.Name)
+                  .HasMaxLength(100)
+                  .IsRequired();
+        });
+
         modelBuilder.Entity<QuizQuestion>(entity =>
         {
+            entity.HasKey(q => q.Id);
+
             entity.HasOne(qc => qc.Quiz)
                 .WithMany(q => q.QuizQuestions)
                 .HasForeignKey(qc => qc.QuizId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(qc => qc.Question)
                 .WithMany()
                 .HasForeignKey(qc => qc.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(qc => new { qc.QuizId, qc.QuestionId})
                 .IsUnique()
                 .HasFilter("[IsDeleted] = 0");
         });
 
-        modelBuilder.Entity<Question>()
-            .HasOne(q => q.Answer)
-            .WithOne(a => a.Question)
-            .HasForeignKey<Answer>(a => a.QuestionId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Question>(entity =>
+        {
+            entity.HasKey(q => q.Id);
 
+            entity.Property(q => q.Text)
+                  .IsRequired()
+                  .HasMaxLength(1000);
+        });
+
+        modelBuilder.Entity<Answer>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+
+            entity.Property(a => a.Text)
+                  .IsRequired()
+                  .HasMaxLength(500);
+
+            entity.HasOne(a => a.Question)
+                  .WithOne(q => q.Answer)
+                  .HasForeignKey<Answer>(a => a.QuestionId);
+
+            entity.HasIndex(a => a.QuestionId)
+                  .IsUnique()
+                  .HasFilter("[IsDeleted] = 0");
+        });
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
@@ -69,36 +100,36 @@ public class QuizContext : DbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        foreach (var entry in ChangeTracker.Entries())
+        var utcNow = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries()
+                     .Where(e => e.State == EntityState.Deleted))
         {
-            var entity = entry.Entity;
-            var type = entity.GetType();
-
-            Type? baseType = type;
-            while (baseType != null)
+            if (entry.Entity is ISoftDeleteAggregate aggregate)
             {
-                if (baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(AuditBase<>))
-                {
-                    dynamic auditEntity = entity;
-
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            auditEntity.DateCreated = DateTime.UtcNow;
-                            break;
-                        case EntityState.Modified:
-                            auditEntity.DateUpdated = DateTime.UtcNow;
-                            break;
-                        case EntityState.Deleted:
-                            entry.State = EntityState.Modified;
-                            auditEntity.IsDeleted = true;
-                            auditEntity.DateDeleted = DateTime.UtcNow;
-                            break;
-                    }
-                    break;
-                }
-                baseType = baseType.BaseType;
+                aggregate.SoftDelete();
+                entry.State = EntityState.Modified;
+                continue;
             }
+
+            if (entry.Entity is AuditBase<Guid> entity)
+            {
+                entity.IsDeleted = true;
+                entity.DateDeleted = utcNow;
+                entry.State = EntityState.Modified;
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries()
+                     .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+        {
+            if (entry.Entity is not AuditBase<Guid> entity)
+                continue;
+
+            if (entry.State == EntityState.Added)
+                entity.DateCreated = utcNow;
+            else
+                entity.DateUpdated = utcNow;
         }
 
         return await base.SaveChangesAsync(cancellationToken);
