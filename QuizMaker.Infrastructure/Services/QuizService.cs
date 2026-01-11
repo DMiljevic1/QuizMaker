@@ -27,7 +27,7 @@ public class QuizService : IQuizService
         _updateValidator = updateValidator;
     }
 
-    public async Task CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
+    public async Task<QuizResponse> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
     {
         var validationResult = await _createValidator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
@@ -41,6 +41,7 @@ public class QuizService : IQuizService
         if (request.ExistingQuestionsIds.Any())
         {
             var existingQuestions = await _context.Questions
+                .Include(q => q.Answer)
                 .Where(q => request.ExistingQuestionsIds.Contains(q.Id))
                 .ToListAsync(cancellationToken);
 
@@ -73,6 +74,8 @@ public class QuizService : IQuizService
         await _context.Quizzes.AddAsync(quiz, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        return quiz.ToDto();
     }
 
     public async Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken)
@@ -98,7 +101,7 @@ public class QuizService : IQuizService
         return await query.ToPagedResultAsync(parameters.PageNumber, parameters.PageSize, cancellationToken);
     }
 
-    public async Task UpdateQuiz(UpdateQuizRequest request, CancellationToken cancellationToken)
+    public async Task UpdateQuiz(int quizId, UpdateQuizRequest request, CancellationToken cancellationToken)
     {
         var validationResult = await _updateValidator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
@@ -106,10 +109,10 @@ public class QuizService : IQuizService
 
         var quiz = await _context.Quizzes
             .Include(x => x.QuizQuestions).ThenInclude(x => x.Question).ThenInclude(x => x.Answer)
-            .FirstOrDefaultAsync(x => x.Id == request.QuizId, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
 
         if (quiz == null)
-            throw new NotFoundException($"Quiz not found. QuizId={request.QuizId}");
+            throw new NotFoundException($"Quiz not found. QuizId={quizId}");
 
         quiz.Name = request.QuizName;
 

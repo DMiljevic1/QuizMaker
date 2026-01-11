@@ -13,7 +13,7 @@ public class CsvQuizExporter : IQuizExporter
     public byte[] Export(Quiz quiz)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("Question");
+        sb.AppendLine(quiz.Name);
         foreach (var q in quiz.QuizQuestions)
             sb.AppendLine($"\"{q.Question.Text}\"");
 

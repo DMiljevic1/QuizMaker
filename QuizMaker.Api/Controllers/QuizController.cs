@@ -29,8 +29,8 @@ public class QuizController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateQuiz(CreateQuizRequest request, CancellationToken cancellationToken)
     {
-        await _quizService.CreateQuiz(request, cancellationToken);
-        return NoContent();
+        var quiz = await _quizService.CreateQuiz(request, cancellationToken);
+        return Created($"/api/v1/quizzes/{quiz.Id}", quiz);
     }
 
     [HttpGet]
@@ -48,7 +48,7 @@ public class QuizController : ControllerBase
         return Ok(quizzes);
     }
 
-    [HttpPut]
+    [HttpPut("{quizId}")]
     [SwaggerOperation(
         Summary = "Updates an existing quiz",
         Description = "Updates the details of an existing quiz. " +
@@ -59,9 +59,9 @@ public class QuizController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateQuiz([FromBody] UpdateQuizRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateQuiz([FromRoute] int quizId, [FromBody] UpdateQuizRequest request, CancellationToken cancellationToken)
     {
-        await _quizService.UpdateQuiz(request, cancellationToken);
+        await _quizService.UpdateQuiz(quizId, request, cancellationToken);
         return NoContent();
     }
 
