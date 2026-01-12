@@ -3,7 +3,7 @@ using QuizMaker.Domain.Entities;
 using System.Composition;
 using System.Text;
 
-namespace QuizMaker.Infrastructure.Exporters;
+namespace QuizMaker.Exporters.CsvExporter;
 
 [Export(typeof(IQuizExporter))]
 public class CsvQuizExporter : IQuizExporter

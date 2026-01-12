@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Composition" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuizMaker.Application\QuizMaker.Application.csproj" />
+    <ProjectReference Include="..\QuizMaker.Domain\QuizMaker.Domain.csproj" />
+  </ItemGroup>
+
+  <Target Name="CopyToApi" AfterTargets="Build">
+  	<MakeDir Directories="$(SolutionDir)QuizMaker.Api\Exporters" />
+  	<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)QuizMaker.Api\Exporters" />
+  </Target>
+
+</Project>
