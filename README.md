@@ -7,7 +7,7 @@ QuizMaker is a monolithic application built following **Clean Architecture** pri
 ## **Project Structure**
 
 - **QuizMaker.Api** – API layer exposing HTTP endpoints
-- **QuizMaker.Application** – Validations, Custome Exceptions, DTOs and service interfaces.
+- **QuizMaker.Application** – Validations, Custom Exceptions, DTOs and service interfaces.
 - **QuizMaker.Domain** – Core entities
 - **QuizMaker.Infrastructure** – Database context, migrations and service implementations.
 
@@ -43,7 +43,7 @@ The application features a **dynamic plug-in system** using **MEF (Managed Exten
 
    ```bash
    git clone <repository-url>
-   cd QuizMaker
+   cd QuizMaker```
 2. Adjust the connection string in appsettings.Development.json to point to your local SQL Server
 3. Run Api project
 4. Access SwaggerAccess Swagger UI:
@@ -64,6 +64,7 @@ Run QuizMaker using Docker with SQL Server and Seq logging. This setup demonstra
 1. **Clone the repository** and navigate to the folder containing `docker-compose.yml`.
 
 2. Adjust the connection string in `docker-compose.yml`.
+   > **Note on Database:** The default connection string uses `host.docker.internal` to connect to a local SQL Server instance. Ensure your SQL Server allows TCP/IP connections and that the user provided has sufficient permissions to create the database and run migrations.
 
 3. **Prepare Plugins:** Build the desired exporter project (e.g., `QuizMaker.Exporters.Csv`) in Visual Studio. This will trigger the build task that copies the DLL to the API's exporter folder.
 
@@ -94,11 +95,3 @@ Run QuizMaker using Docker with SQL Server and Seq logging. This setup demonstra
 The application uses **Serilog** with **Seq** for centralized logging. 
 - All API requests, database migrations, and **MEF loading events** are logged.
 - To view logs, open `http://localhost:5341` after starting the Docker containers.
-
----
-
-## **Technical Implementation Details**
-
-- **Dependency Injection:** The `ExporterProvider` is registered as a **Singleton**, ensuring the folder scan happens only once at startup.
-- **Reflection & MEF:** The system uses `System.Composition` to compose parts from external assemblies.
-- **Docker Volumes:** The `docker-compose.yml` maps the local `bin/Debug/net8.0/Exporters` directory to the container's `/app/Exporters` directory, enabling hot-swapping of DLLs.
