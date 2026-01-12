@@ -180,6 +180,7 @@ public class QuizService : IQuizService
     public async Task DeleteQuiz(int quizId, CancellationToken cancellationToken)
     {
         var quiz = await _context.Quizzes
+            .Include(x => x.QuizQuestions)
             .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
 
         if (quiz == null)

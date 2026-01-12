@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuizMaker.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "NewQuestionsAnswers",
+                name: "Questions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -51,7 +51,7 @@ namespace QuizMaker.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -64,7 +64,7 @@ namespace QuizMaker.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_Answers_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "NewQuestionsAnswers",
+                        principalTable: "Questions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -88,22 +88,23 @@ namespace QuizMaker.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "FK_QuizQuestions_Questions_QuestionId",
                         column: x => x.QuestionId,
-                        principalTable: "NewQuestionsAnswers",
+                        principalTable: "Questions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_QuizQuestions_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Answers_QuestionId",
                 table: "Answers",
                 column: "QuestionId",
-                unique: true);
+                unique: true,
+                filter: "[IsDeleted] = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QuizQuestions_QuestionId",
@@ -128,7 +129,7 @@ namespace QuizMaker.Infrastructure.Migrations
                 name: "QuizQuestions");
 
             migrationBuilder.DropTable(
-                name: "NewQuestionsAnswers");
+                name: "Questions");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
