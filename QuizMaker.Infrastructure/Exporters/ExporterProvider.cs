@@ -20,25 +20,27 @@ public class ExporterProvider : IExporterProvider
 
         var exportersFolder = Path.Combine(AppContext.BaseDirectory, "Exporters");
 
-        if (Directory.Exists(exportersFolder))
+        if (!Directory.Exists(exportersFolder))
         {
-            var dlls = Directory.GetFiles(exportersFolder, "*.dll", SearchOption.TopDirectoryOnly);
+            Directory.CreateDirectory(exportersFolder);
+        }
 
-            foreach (var dll in dlls)
+        var dlls = Directory.GetFiles(exportersFolder, "*.dll", SearchOption.TopDirectoryOnly);
+
+        foreach (var dll in dlls)
+        {
+            try
             {
-                try
-                {
-                    var assembly = Assembly.LoadFrom(dll);
+                var assembly = Assembly.LoadFrom(dll);
 
-                    if (!assemblies.Contains(assembly))
-                    {
-                        assemblies.Add(assembly);
-                    }
-                }
-                catch (Exception ex)
+                if (!assemblies.Contains(assembly))
                 {
-                    Console.WriteLine($"Greška pri učitavanju DLL-a {dll}: {ex.Message}");
+                    assemblies.Add(assembly);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Greška pri učitavanju DLL-a {dll}: {ex.Message}");
             }
         }
 
