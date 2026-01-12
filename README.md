@@ -46,7 +46,7 @@ The application features a **dynamic plug-in system** using **MEF (Managed Exten
    cd QuizMaker
    ```
 2. Adjust the connection string in appsettings.Development.json to point to your local SQL Server
-3. Run Api project
+3. Run Api project (QuizMaker.Api)
 4. Access SwaggerAccess Swagger UI:
 -  HTTPS: https://localhost:5001/swagger/index.html
 -  HTTP: http://localhost:5000/swagger/index.html
