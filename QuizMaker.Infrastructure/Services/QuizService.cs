@@ -135,7 +135,7 @@ public class QuizService : IQuizService
             throw new ValidationException(validationResult.Errors);
 
         var quiz = await _context.Quizzes
-            .Include(x => x.QuizQuestions).ThenInclude(x => x.Question).ThenInclude(x => x.Answer)
+            .Include(x => x.QuizQuestions)
             .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
 
         if (quiz == null)
@@ -143,11 +143,10 @@ public class QuizService : IQuizService
 
         quiz.Name = request.QuizName;
 
-        var validExistingQuestions = await _context.Questions
+        var validExistingIds = await _context.Questions
             .Where(q => request.ExistingQuestionIds.Contains(q.Id))
+            .Select(x => x.Id)
             .ToListAsync(cancellationToken);
-
-        var validExistingIds = validExistingQuestions.Select(q => q.Id).ToHashSet();
 
         var toRemove = quiz.QuizQuestions
             .Where(x => x.QuestionId != 0 && !validExistingIds.Contains(x.QuestionId))
@@ -158,12 +157,11 @@ public class QuizService : IQuizService
             quiz.QuizQuestions.Remove(quizQuestion);
         }
 
-        foreach (var questionId in validExistingIds)
+        var currentIds = quiz.QuizQuestions.Select(qq => qq.QuestionId).ToHashSet();
+
+        foreach (var id in validExistingIds.Where(id => !currentIds.Contains(id)))
         {
-            if (!quiz.QuizQuestions.Any(x => x.QuestionId == questionId))
-            {
-                quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = questionId });
-            }
+            quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = id });
         }
 
         foreach (var newQ in request.NewQuestions)
