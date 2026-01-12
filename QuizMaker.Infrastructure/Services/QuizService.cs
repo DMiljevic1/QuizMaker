@@ -143,24 +143,27 @@ public class QuizService : IQuizService
 
         quiz.Name = request.QuizName;
 
-        var requestedQuestions = request.NewQuestions;
+        var validExistingQuestions = await _context.Questions
+            .Where(q => request.ExistingQuestionIds.Contains(q.Id))
+            .ToListAsync(cancellationToken);
 
-        var existingQuestionIds = request.ExistingQuestionIds
-            .ToHashSet();
+        var validExistingIds = validExistingQuestions.Select(q => q.Id).ToHashSet();
 
         var toRemove = quiz.QuizQuestions
-            .Where(x => !existingQuestionIds.Contains(x.QuestionId))
+            .Where(x => x.QuestionId != 0 && !validExistingIds.Contains(x.QuestionId))
             .ToList();
 
-        foreach(var quizQuestion in toRemove)
+        foreach (var quizQuestion in toRemove)
         {
             quiz.QuizQuestions.Remove(quizQuestion);
         }
 
-        foreach (var questionId in request.ExistingQuestionIds)
+        foreach (var questionId in validExistingIds)
         {
             if (!quiz.QuizQuestions.Any(x => x.QuestionId == questionId))
+            {
                 quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = questionId });
+            }
         }
 
         foreach (var newQ in request.NewQuestions)
