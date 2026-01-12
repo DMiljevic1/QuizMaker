@@ -7,10 +7,9 @@ services:
     container_name: quiz-api
     ports:
       - "5000:5000"
-      - "5001:5001"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=Quiz;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=Quiz;User Id=Dux;Password=Fesb1085!;TrustServerCertificate=True"
     depends_on:
       - quizmaker.seq
     volumes:
@@ -23,5 +22,6 @@ services:
       - "5341:80"
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true 
     volumes:
       - ./seq-data:/data

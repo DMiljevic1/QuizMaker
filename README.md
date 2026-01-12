@@ -92,7 +92,7 @@ Run QuizMaker using Docker with SQL Server and Seq logging. This setup demonstra
    - **Result:** You will now see `["CSV"]`. The API successfully discovered and loaded the new logic at runtime!
 
 6. **Access the services:**
-   - **API Swagger:** [http://localhost:5000/swagger/index.html](http://localhost:5000/swagger/index.html), [https://localhost:5001/swagger/index.html](https://localhost:5001/swagger/index.html)
+   - **API Swagger:** [http://localhost:5000/swagger/index.html](http://localhost:5000/swagger/index.html)
    - **Seq Logs:** [http://localhost:5341/](http://localhost:5341/)
 
 ---
