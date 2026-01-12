@@ -82,11 +82,11 @@ Run QuizMaker using Docker with SQL Server and Seq logging. This setup demonstra
 
    - **Initial State:** Start the containers. Open Swagger and call `GET /api/quizzes/export-formats`.
      - **Result:** You will receive an empty list `[]`. This proves the API is running without any exporters pre-installed.
-   - **Plug-in Injection:** In Visual Studio, right-click the **QuizMaker.Exporters.CsvExporter** project and select **Build**.
+   - **Plug-in Injection:** In Visual Studio, right-click the **QuizMaker.Exporters.CsvExporter** project and select **Build** (or **Rebuild**).
      - *This copies the DLL to the shared Docker volume folder automatically.*
    - **Activation:** Restart only the API container to trigger a new scan:
      ```bash
-     docker-compose restart quiz-api
+     docker restart quiz-api
      ```
    - **Final Result:** Refresh Swagger and call the same endpoint again.
    - **Result:** You will now see `["CSV"]`. The API successfully discovered and loaded the new logic at runtime!

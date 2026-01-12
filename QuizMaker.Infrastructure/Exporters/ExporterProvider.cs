@@ -21,7 +21,7 @@ public class ExporterProvider : IExporterProvider
     {
         var assemblies = new List<Assembly> { Assembly.GetExecutingAssembly() };
 
-        var exportersFolder = Path.Combine(AppContext.BaseDirectory, "Exporters");
+        var exportersFolder = Path.Combine(Directory.GetCurrentDirectory(), "Exporters");
 
         if (!Directory.Exists(exportersFolder))
         {
