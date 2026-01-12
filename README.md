@@ -43,7 +43,8 @@ The application features a **dynamic plug-in system** using **MEF (Managed Exten
 
    ```bash
    git clone <repository-url>
-   cd QuizMaker```
+   cd QuizMaker
+   ```
 2. Adjust the connection string in appsettings.Development.json to point to your local SQL Server
 3. Run Api project
 4. Access SwaggerAccess Swagger UI:
@@ -75,14 +76,20 @@ Run QuizMaker using Docker with SQL Server and Seq logging. This setup demonstra
      docker-compose up -d
      ```
 
-5. **Simulate Plug-in Loading (The "No-Recompile" Test):**
-   - While the API is running in Docker, you can add a new format:
-     1. Build a **new** Exporter project in Visual Studio.
-     2. Restart only the API container: 
-        ```bash
-        docker-compose restart quiz-api
-        ```
-     3. Refresh Swagger and call `GET /api/export-formats`. The new format will appear instantly.
+5. **Plugin Test (Step-by-Step)**
+
+To truly see the power of the MEF implementation and Docker volumes, follow these steps:
+
+- **Initial State:** Start the containers. Open Swagger and call `GET /api/quizzes/export-formats`.
+  - **Result:** You will receive an empty list `[]`. This proves the API is running without any exporters pre-installed.
+- **Plug-in Injection:** In Visual Studio, right-click the **QuizMaker.Exporters.CsvExporter** project and select **Build**.
+  - *This copies the DLL to the shared Docker volume folder automatically.*
+- **Activation:** Restart only the API container to trigger a new scan:
+  ```bash
+  docker-compose restart quiz-api
+  ```
+- **Final Result:** Refresh Swagger and call the same endpoint again.
+- **Result:** You will now see `["CSV"]`. The API successfully discovered and loaded the new logic at runtime!
 
 6. **Access the services:**
    - **API Swagger:** [http://localhost:5000/swagger/index.html](http://localhost:5000/swagger/index.html)
