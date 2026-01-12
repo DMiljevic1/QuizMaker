@@ -12,8 +12,8 @@ using QuizMaker.Infrastructure.Contexts;
 namespace QuizMaker.Infrastructure.Migrations
 {
     [DbContext(typeof(QuizContext))]
-    [Migration("20260108194436_initialMigration")]
-    partial class initialMigration
+    [Migration("20260112063038_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,12 +50,14 @@ namespace QuizMaker.Infrastructure.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Answers");
                 });
@@ -82,11 +84,12 @@ namespace QuizMaker.Infrastructure.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("NewQuestionsAnswers");
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("QuizMaker.Domain.Entities.Quiz", b =>
@@ -109,7 +112,7 @@ namespace QuizMaker.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("QuizName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -172,13 +175,13 @@ namespace QuizMaker.Infrastructure.Migrations
                     b.HasOne("QuizMaker.Domain.Entities.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("QuizMaker.Domain.Entities.Quiz", "Quiz")
                         .WithMany("QuizQuestions")
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Question");

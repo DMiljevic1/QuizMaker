@@ -35,12 +35,12 @@ public class QuizContext : DbContext
             entity.HasOne(qc => qc.Quiz)
                 .WithMany(q => q.QuizQuestions)
                 .HasForeignKey(qc => qc.QuizId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(qc => qc.Question)
                 .WithMany()
                 .HasForeignKey(qc => qc.QuestionId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(qc => new { qc.QuizId, qc.QuestionId})
                 .IsUnique()
