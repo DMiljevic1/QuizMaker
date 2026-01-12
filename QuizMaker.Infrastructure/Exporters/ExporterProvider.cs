@@ -1,4 +1,5 @@
-﻿using QuizMaker.Application.Exceptions;
+﻿using Microsoft.Extensions.Logging;
+using QuizMaker.Application.Exceptions;
 using QuizMaker.Application.Exporters;
 using System.Composition.Hosting;
 using System.Reflection;
@@ -8,9 +9,11 @@ namespace QuizMaker.Infrastructure.Exporters;
 public class ExporterProvider : IExporterProvider
 {
     private readonly Dictionary<string, IQuizExporter> _exporters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ILogger<ExporterProvider> _logger;
 
-    public ExporterProvider()
+    public ExporterProvider(ILogger<ExporterProvider> logger)
     {
+        _logger = logger;
         LoadAllExporters();
     }
 
@@ -40,7 +43,7 @@ public class ExporterProvider : IExporterProvider
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Greška pri učitavanju DLL-a {dll}: {ex.Message}");
+                _logger.LogError(ex, "Greška pri učitavanju exporter DLL-a: {Path}", dll);
             }
         }
 

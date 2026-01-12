@@ -95,15 +95,14 @@ public class QuizController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("exporters/{quizId}")]
+    [HttpGet("export-formats")]
     [SwaggerOperation(
-        Summary = "Gets available export formats for a quiz",
-        Description = "Returns a list of all available export formats (e.g., CSV) for the specified quiz. " +
-                      "Returns 200 OK with the list or 404 Not Found if the quiz does not exist. " +
+        Summary = "Gets all supported export formats",
+        Description = "Returns a list of all available export formats (e.g., CSV). " +
+                      "Returns 200 OK with the list. " +
                       "Unexpected errors return 500 Internal Server Error."
     )]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetAvailableExporters()
     {
         var formats = _quizService.GetAvailableExportFormats();
