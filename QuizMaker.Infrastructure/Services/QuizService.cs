@@ -38,19 +38,27 @@ public class QuizService : IQuizService
             Name = request.QuizName
         };
 
-        if (request.ExistingQuestionsIds.Any())
+        var requestedIds = request.ExistingQuestionsIds
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList();
+
+        if (requestedIds.Any())
         {
             var existingQuestions = await _context.Questions
                 .Include(q => q.Answer)
-                .Where(q => request.ExistingQuestionsIds.Contains(q.Id))
+                .Where(q => requestedIds.Contains(q.Id))
                 .ToListAsync(cancellationToken);
+
+            var foundIds = existingQuestions.Select(q => q.Id).ToHashSet();
+            var missingIds = requestedIds.Where(id => !foundIds.Contains(id)).ToList();
+
+            if (missingIds.Any())
+                throw new BadRequestException($"Some question IDs do not exist: {string.Join(", ", missingIds)}");
 
             foreach (var question in existingQuestions)
             {
-                quiz.QuizQuestions.Add(new QuizQuestion
-                {
-                    Question = question
-                });
+                quiz.QuizQuestions.Add(new QuizQuestion { Question = question });
             }
         }
 
@@ -72,11 +80,11 @@ public class QuizService : IQuizService
         }
 
         await _context.Quizzes.AddAsync(quiz, cancellationToken);
-
         await _context.SaveChangesAsync(cancellationToken);
 
         return quiz.ToDto();
     }
+
 
     public async Task<PagedResult<QuizResponse>> GetQuizzes(PaginationParameters parameters, CancellationToken cancellationToken)
     {
@@ -138,30 +146,48 @@ public class QuizService : IQuizService
             .Include(x => x.QuizQuestions)
             .FirstOrDefaultAsync(x => x.Id == quizId, cancellationToken);
 
-        if (quiz == null)
+        if (quiz is null)
             throw new NotFoundException($"Quiz not found. QuizId={quizId}");
 
         quiz.Name = request.QuizName;
 
-        var validExistingIds = await _context.Questions
-            .Where(q => request.ExistingQuestionIds.Contains(q.Id))
-            .Select(x => x.Id)
-            .ToListAsync(cancellationToken);
-
-        var toRemove = quiz.QuizQuestions
-            .Where(x => x.QuestionId != 0 && !validExistingIds.Contains(x.QuestionId))
+        var requestedIds = (request.ExistingQuestionIds)
+            .Where(id => id > 0)
+            .Distinct()
             .ToList();
 
-        foreach (var quizQuestion in toRemove)
+        if (requestedIds.Any())
         {
-            quiz.QuizQuestions.Remove(quizQuestion);
+            var existingIds = await _context.Questions
+                .Where(q => requestedIds.Contains(q.Id))
+                .Select(q => q.Id)
+                .ToListAsync(cancellationToken);
+
+            var missingIds = requestedIds.Except(existingIds).ToList();
+            if (missingIds.Any())
+                throw new BadRequestException($"Some question IDs do not exist: {string.Join(", ", missingIds)}");
+
+            requestedIds = existingIds;
         }
 
-        var currentIds = quiz.QuizQuestions.Select(qq => qq.QuestionId).ToHashSet();
+        var requestedSet = requestedIds.ToHashSet();
 
-        foreach (var id in validExistingIds.Where(id => !currentIds.Contains(id)))
+        var toRemove = quiz.QuizQuestions
+            .Where(qq => qq.QuestionId != 0 && !requestedSet.Contains(qq.QuestionId))
+            .ToList();
+
+        foreach (var qq in toRemove)
+            quiz.QuizQuestions.Remove(qq);
+
+        var currentIds = quiz.QuizQuestions
+            .Where(qq => qq.QuestionId > 0)
+            .Select(qq => qq.QuestionId)
+            .ToHashSet();
+
+        foreach (var id in requestedSet)
         {
-            quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = id });
+            if (!currentIds.Contains(id))
+                quiz.QuizQuestions.Add(new QuizQuestion { QuestionId = id });
         }
 
         foreach (var newQ in request.NewQuestions)
@@ -177,6 +203,7 @@ public class QuizService : IQuizService
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
 
     public async Task DeleteQuiz(int quizId, CancellationToken cancellationToken)
     {

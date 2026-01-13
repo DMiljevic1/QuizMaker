@@ -9,7 +9,7 @@ services:
       - "5000:5000"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=Quiz;User Id=Dux;Password=Fesb1085!;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=host.docker.internal,1433;Database=Quiz;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True"
     depends_on:
       - quizmaker.seq
     volumes:
